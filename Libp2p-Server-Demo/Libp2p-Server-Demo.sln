@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Libp2p-Server-Demo", "Libp2p-Server-Demo\Libp2p-Server-Demo.njsproj", "{2103EF2A-CF57-433C-B831-64EB4FD45668}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2103EF2A-CF57-433C-B831-64EB4FD45668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2103EF2A-CF57-433C-B831-64EB4FD45668}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2103EF2A-CF57-433C-B831-64EB4FD45668}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2103EF2A-CF57-433C-B831-64EB4FD45668}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CA538EED-9FFF-4108-941D-ABEFD8C7A3F7}
+	EndGlobalSection
+EndGlobal

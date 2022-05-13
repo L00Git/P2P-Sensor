@@ -1,0 +1,6 @@
+C:\Users\klaas\source\repos\testClient\testClient\obj\Debug\testClient.njsproj.AssemblyReference.cache
+C:\Users\klaas\source\repos\testClient\testClient\obj\Debug\testClient.njsproj.CoreCompileInputs.cache
+C:\Users\klaas\source\repos\testClient\testClient\bin\Microsoft.NodejsTools.WebRole.dll
+E:\Ablagen\VisualStudioProjects\testClient\testClient\obj\Debug\testClient.njsproj.AssemblyReference.cache
+E:\Ablagen\VisualStudioProjects\testClient\testClient\obj\Debug\testClient.njsproj.CoreCompileInputs.cache
+E:\Ablagen\VisualStudioProjects\testClient\testClient\bin\Microsoft.NodejsTools.WebRole.dll

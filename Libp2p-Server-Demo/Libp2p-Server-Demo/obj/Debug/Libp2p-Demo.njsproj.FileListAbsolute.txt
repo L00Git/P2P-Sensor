@@ -1,0 +1,3 @@
+E:\Ablagen\VisualStudioProjects\Libp2p-Demo\Libp2p-Demo\obj\Debug\Libp2p-Demo.njsproj.AssemblyReference.cache
+E:\Ablagen\VisualStudioProjects\Libp2p-Demo\Libp2p-Demo\obj\Debug\Libp2p-Demo.njsproj.CoreCompileInputs.cache
+E:\Ablagen\VisualStudioProjects\Libp2p-Demo\Libp2p-Demo\bin\Microsoft.NodejsTools.WebRole.dll

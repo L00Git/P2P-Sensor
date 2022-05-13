@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>P2P-Interface</h1>
+
+<label for="commands">Choose a car:</label>
+
+<select id="commands" onchange="change()">
+  <option value="GET">Get</option>
+  <option value="SUB">Subscribe</option>
+  <option value="UNSUB">Unsuscribe</option>
+  <option value="PUB">Publish</option>
+</select><br><br>
+
+<label for="options">Get options:</label>
+<select id="options" onchange="changeGet()">
+    <option value="ALL">All</option>
+    <option value="LAST">Last</option>
+    <option value="BETWEEN">Between</option>
+</select><br><br>
+
+
+<label for="topic">Topic: </label>
+<input type="text" id="topic"><br><br>
+<label for="lowerBound">lowerBound: </label>
+<input type="text" id="lowerBound">
+<label for="upperBound">upperBound: </label>
+<input type="text" id="upperBound"><br><br>
+<label for="key">Key: </label>
+<input type="text" id="key">
+<label for="value">Value: </label>
+<input type="text" id="value"><br><br>
+
+<ul id = "log"></ul>
+
+<!--https://www.pegaxchange.com/2018/03/23/websocket-client/-->
+<input id="btnConnect" type="button" value="Connect" onclick="onConnectClick()">&nbsp;&nbsp;
+<input id="btnDisconnect" type="button" value="Disconnect" onclick="onDisconnectClick()" disabled="disabled"><br>
+<input id="btnSend" type="button" value="Send Message" disabled="disabled" onclick="onSendClick()">
+
+
+<script src="./app.js"></script>
+  
+</body>
+</html>
