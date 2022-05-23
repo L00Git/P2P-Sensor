@@ -4,3 +4,6 @@ C:\Users\klaas\source\repos\testClient\testClient\bin\Microsoft.NodejsTools.WebR
 E:\Ablagen\VisualStudioProjects\testClient\testClient\obj\Debug\testClient.njsproj.AssemblyReference.cache
 E:\Ablagen\VisualStudioProjects\testClient\testClient\obj\Debug\testClient.njsproj.CoreCompileInputs.cache
 E:\Ablagen\VisualStudioProjects\testClient\testClient\bin\Microsoft.NodejsTools.WebRole.dll
+E:\Studium\Semester 6\Informatikprojekt\GitHub\testClient\testClient\obj\Debug\testClient.njsproj.AssemblyReference.cache
+E:\Studium\Semester 6\Informatikprojekt\GitHub\testClient\testClient\obj\Debug\testClient.njsproj.CoreCompileInputs.cache
+E:\Studium\Semester 6\Informatikprojekt\GitHub\testClient\testClient\bin\Microsoft.NodejsTools.WebRole.dll

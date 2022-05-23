@@ -46,6 +46,13 @@
             document.getElementById("upperBound").style.visibility = "hidden"
             document.getElementById("key").style.visibility = "visible"
             document.getElementById("value").style.visibility = "visible"
+        }else if(e == "STATUS"){
+            document.getElementById("options").style.visibility = "hidden"
+            document.getElementById("topic").style.visibility = "hidden"
+            document.getElementById("lowerBound").style.visibility = "hidden"
+            document.getElementById("upperBound").style.visibility = "hidden"
+            document.getElementById("key").style.visibility = "hidden"
+            document.getElementById("value").style.visibility = "hidden"
         }
     }
 
@@ -76,6 +83,8 @@
             return e + " " +document.getElementById("topic").value
         }else if(e == "PUB"){
             return e + ' {"key": "' + document.getElementById("key").value + '", "value": "' + document.getElementById("value").value + '" }'
+        }else if(e == "STATUS"){
+            return e + " TOPICS"
         }
     }
 

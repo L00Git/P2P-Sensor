@@ -1,3 +1,6 @@
 E:\Ablagen\VisualStudioProjects\Libp2p-Server-Demo\Libp2p-Server-Demo\obj\Debug\Libp2p-Server-Demo.njsproj.AssemblyReference.cache
 E:\Ablagen\VisualStudioProjects\Libp2p-Server-Demo\Libp2p-Server-Demo\obj\Debug\Libp2p-Server-Demo.njsproj.CoreCompileInputs.cache
 E:\Ablagen\VisualStudioProjects\Libp2p-Server-Demo\Libp2p-Server-Demo\bin\Microsoft.NodejsTools.WebRole.dll
+E:\Studium\Semester 6\Informatikprojekt\GitHub\Libp2p-Server-Demo\Libp2p-Server-Demo\obj\Debug\Libp2p-Server-Demo.njsproj.AssemblyReference.cache
+E:\Studium\Semester 6\Informatikprojekt\GitHub\Libp2p-Server-Demo\Libp2p-Server-Demo\obj\Debug\Libp2p-Server-Demo.njsproj.CoreCompileInputs.cache
+E:\Studium\Semester 6\Informatikprojekt\GitHub\Libp2p-Server-Demo\Libp2p-Server-Demo\bin\Microsoft.NodejsTools.WebRole.dll

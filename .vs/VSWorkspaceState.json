@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\HTML-GUI",
+    "\\Libp2p-Server-Demo",
+    "\\Libp2p-Server-Demo\\Libp2p-Server-Demo",
+    "\\testClient",
+    "\\testClient\\testClient"
+  ],
+  "SelectedNode": "\\Libp2p-Server-Demo\\Libp2p-Server-Demo\\p2pNode.ts",
+  "PreviewInSolutionExplorer": false
+}
