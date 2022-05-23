@@ -22,13 +22,18 @@ class lookupService {
         if (this.peerRefrences.some(element => { return element.maddr.equals(maddr); })) //if see new maddr return true => send all my metadata
             register = false;
         if (!this.peerRefrences.some(element => { return element.maddr.equals(maddr) && element.topics.length == topics.length && element.topics.every((value, index) => value == topics[index]); })) {
-            this.unregister(maddr);
+            this.unregister(maddr.toString().substring(maddr.toString().lastIndexOf('/'), maddr.toString().length));
             this.peerRefrences.push(newPeerRefrence);
         }
         return register;
     }
-    unregister(maddr) {
-        const index = this.peerRefrences.findIndex(element => { return element.maddr.equals(maddr); });
+    unregister(peerId) {
+        const index = this.peerRefrences.findIndex(element => {
+            console.log(element.maddr.toString().substring(element.maddr.toString().lastIndexOf('/') + 1, element.maddr.toString().length));
+            console.log(peerId);
+            console.log("boolean: " + (element.maddr.toString().substring(element.maddr.toString().lastIndexOf('/') + 1, element.maddr.toString().length) == peerId).toString());
+            return element.maddr.toString().substring(element.maddr.toString().lastIndexOf('/') + 1, element.maddr.toString().length) == peerId;
+        });
         if (index > -1)
             this.peerRefrences.splice(index, 1);
     }

@@ -1,4 +1,6 @@
+import console from "console";
 import { ReadStream, WriteStream } from "fs";
+import { connect } from "net";
 import { Readable } from "stream";
 import { isNullOrUndefined, TextEncoder } from "util";
 
@@ -9,6 +11,7 @@ const MPLEX = require('libp2p-mplex')
 const MDNS = require('libp2p-mdns')
 const Gossipsub = require("libp2p-gossipsub")
 const { multiaddr } = require('multiaddr');
+import { Multiaddr } from "multiaddr";
 const { fromString } = require('uint8arrays/from-string')
 const { toString } = require('uint8arrays/to-string')
 
@@ -148,11 +151,15 @@ export class p2pNode {
         this.node.connectionManager.on('peer:connect', (connection) => {
             console.log('Connected to %s', connection.remotePeer.toB58String()) // Log connected peer
             this.announceMyself()
-            //this.initiateSaveRedundant()
+            this.initiateSaveRedundant()
         })
+        //  /ip4/192.168.178.27/tcp/51018/p2p/QmRvAvdFqPmSrbyKq6BiwvCzd4AkNLzfXpVpBJdbBsjXLJ
+        //  /ip4/192.168.178.27/tcp/51018/p2p/QmRvAvdFqPmSrbyKq6BiwvCzd4AkNLzfXpVpBJdbBsjXLJ
         this.node.connectionManager.on('peer:disconnect', (connection) => {
-            this.lookupService.unregister(connection.remoteAddr)
-            this.publish("ORGA_DISCON", connection.remoteAddr)
+            console.log("Disconnecting: " + connection.remoteAddr)
+            console.log("Disconnecting: " + connection.remotePeer.toB58String())
+            this.lookupService.unregister(connection.remotePeer.toB58String())
+            this.publish("ORGA_DISCON", connection.remotePeer.toB58String())
         })
 
         /*
@@ -190,7 +197,7 @@ export class p2pNode {
             this.node.pubsub.on("ORGA_DISCON", (msg) => {
                 try {
                     console.log("Got Discon %s", toString(msg.data))
-                    this.lookupService.unregister(multiaddr(toString(msg.data)))
+                    this.lookupService.unregister((toString(msg.data)))
                     console.log("lookupService:" + JSON.stringify(root.lookupService.peerRefrences))
                 } catch (e) {
                     console.error(e)
@@ -270,32 +277,36 @@ export class p2pNode {
         await new Promise(resolve => setTimeout(resolve, 10000)) // wait 10 sec
         try {
             if (this.redundantCount > 0) {
-                let staus = this.getStatus().replace('"', '').replace('{', '').replace('}', '')
+                let staus = this.getStatus().replace(/"/g, '').replace('{', '').replace('}', '')
                 console.log("redundant before:" + staus)
                 if (staus.split(",").length > 1) {
-                    let leastRedundant : [string, number] = null
+                    let leastRedundant: [string, number] = [null, null]
                     staus.split(",").forEach(elment => {
                         let topic = elment.split(":")[0]
-                        let topicAmount = parseInt(elment.split(":")[0])
-                        if (topic != this.myTopic && this.redundantTopics.some(redundantTop => { redundantTop.topic == topic })) {
-                            if (leastRedundant == null) { 
+                        let topicAmount = parseInt(elment.split(":")[1])
+                        console.log("redundant looping:" + topic + " " + topicAmount)
+                        console.log("redundant topic:" + topic + " mytopic " + this.myTopic + " redundantTopics: " + JSON.stringify(this.redundantTopics))
+                        if (topic != this.myTopic && !this.redundantTopics.some(redundantTop => { return redundantTop.topic == topic })) {
+                            if (leastRedundant[0] == null) { 
+                                console.log("redundant saving:" + topic + " " + topicAmount)
                                 leastRedundant[0] = topic
                                 leastRedundant[1] = topicAmount
                             }
                             if (topicAmount < leastRedundant[1]) {
+                                console.log("redundant saving:" + topic + " " + topicAmount)
                                 leastRedundant[0] = topic
                                 leastRedundant[1] = topicAmount
                             }
                         }
                     })
-
-                    if (redundantTopic != null) {
+                    console.log("redundant found:" + leastRedundant[0] + " " + leastRedundant[1])
+                    if (leastRedundant[0] != null) {
                         let newRedundantTopic = new redundantTopic(leastRedundant[0])
                         newRedundantTopic.clearFile()
                         this.redundantTopics.push(newRedundantTopic)
                         let responseId = Math.floor(new Date().getTime() / 1000).toString()
                         this.listenNewRedundant(this.redundantTopics[this.redundantTopics.length-1], responseId)
-                        this.dialGet("GET " + this.myAddr + " ALL " + redundantTopic[0] + " 1 " + responseId, redundantTopic[0])
+                        this.dialGet("GET " + this.myAddr + " ALL " + leastRedundant[0] + " 1 " + responseId, leastRedundant[0])
                     }
                 }
             }
@@ -467,9 +478,11 @@ export class p2pNode {
     }
 
     async dialGet(msg: String, topic: String) {
+        console.log("Dial Get: " + topic, " " + JSON.stringify(this.lookupService))
         if (this.lookupService.find(topic).length == 0)
             return false
         try {
+            console.log("Dial Get" + msg + " from: " + this.lookupService.find(topic)[0].maddr)
             const { stream, protocol } = await this.node.dialProtocol(this.lookupService.find(topic)[0].maddr, `/get/1.0.0`)
             pipe(
                 // Read from stdin (the source)
@@ -485,8 +498,8 @@ export class p2pNode {
         } catch (e) {
             console.error("dialGetError " + e)
             console.log("Removed refrence to " + this.lookupService.find(topic)[0].maddr + " due to Error")
-            this.lookupService.unregister(this.lookupService.find(topic)[0].maddr) //if error with this peer remove him
-            console.log("lookupService:" + this.lookupService.peerRefrences.toString())
+            this.lookupService.unregister(this.lookupService.find(topic)[0].maddr.toString().substring(this.lookupService.find(topic)[0].maddr.toString().lastIndexOf('/') + 1, this.lookupService.find(topic)[0].maddr.toString().length)) //if error with this peer remove him
+            console.log("lookupService:" + JSON.stringify(this.lookupService.peerRefrences))
             this.dialGet(msg, topic)
         }
     }
@@ -525,8 +538,12 @@ export class p2pNode {
                     // For each chunk of data
                     for await (let chunk of source) {
                         console.log("This shoud be saved to redundant Topic: %s", chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')))
-                        // !!-------------------------------------------hier save to disk
-                        redundantTop.writeStream.write(chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')))
+                        let jsonData = JSON.parse(chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')))
+                        console.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData))
+                        if (jsonData.message == "SUCCESS") {
+                            console.log("bin in Success")
+                            redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n")
+                        }
                     }
                 }
             )

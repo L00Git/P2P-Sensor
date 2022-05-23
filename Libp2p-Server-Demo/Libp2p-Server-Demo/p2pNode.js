@@ -15,8 +15,12 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.p2pNode = void 0;
+const console_1 = __importDefault(require("console"));
 const stream_1 = require("stream");
 const util_1 = require("util");
 const Libp2p = require('libp2p');
@@ -57,10 +61,10 @@ class redundantTopic {
             try {
                 let clearWrite = createWriteStream(__dirname + `/sensors/${this.topic}.csv`, { 'flags': 'w' });
                 clearWrite.end();
-                console.log("Overwritten");
+                console_1.default.log("Overwritten");
             }
             catch (e) {
-                console.error("Cant overwrite: " + e);
+                console_1.default.error("Cant overwrite: " + e);
             }
         });
     }
@@ -69,7 +73,7 @@ class redundantTopic {
             return fs.stat(__dirname + `/sensors/${this.topic}.csv`).size;
         }
         catch (err) {
-            console.log(err);
+            console_1.default.log(err);
             return null;
         }
     }
@@ -81,7 +85,7 @@ class p2pNode {
         this.stop = () => __awaiter(this, void 0, void 0, function* () {
             // stop libp2p
             yield this.node.stop();
-            console.log('libp2p has stopped');
+            console_1.default.log('libp2p has stopped');
             process.exit(0);
         });
         this.redundantCount = 0;
@@ -130,20 +134,23 @@ class p2pNode {
             });
             // start libp2p
             yield this.node.start();
-            console.log('libp2p has started');
+            console_1.default.log('libp2p has started');
             this.setTerminalTitle(this.node.peerId.toB58String());
             this.node.on('peer:discovery', (peerData) => {
-                console.log('Found a peer in the local network', peerData.id.toString(), peerData.multiaddrs);
+                console_1.default.log('Found a peer in the local network', peerData.id.toString(), peerData.multiaddrs);
             });
             this.node.connectionManager.on('peer:connect', (connection) => {
-                console.log('Connected to %s', connection.remotePeer.toB58String()); // Log connected peer
+                console_1.default.log('Connected to %s', connection.remotePeer.toB58String()); // Log connected peer
                 this.announceMyself();
-                this.initiateSaveRedundant;
-                //this.initiateSaveRedundant()
+                this.initiateSaveRedundant();
             });
+            //  /ip4/192.168.178.27/tcp/51018/p2p/QmRvAvdFqPmSrbyKq6BiwvCzd4AkNLzfXpVpBJdbBsjXLJ
+            //  /ip4/192.168.178.27/tcp/51018/p2p/QmRvAvdFqPmSrbyKq6BiwvCzd4AkNLzfXpVpBJdbBsjXLJ
             this.node.connectionManager.on('peer:disconnect', (connection) => {
-                this.lookupService.unregister(connection.remoteAddr);
-                this.publish("ORGA_DISCON", connection.remoteAddr);
+                console_1.default.log("Disconnecting: " + connection.remoteAddr);
+                console_1.default.log("Disconnecting: " + connection.remotePeer.toB58String());
+                this.lookupService.unregister(connection.remotePeer.toB58String());
+                this.publish("ORGA_DISCON", connection.remotePeer.toB58String());
             });
             /*
                GET MADDR/ID OPT TIMESTAMP
@@ -152,34 +159,34 @@ class p2pNode {
                GET MADDR/ID BETWEEN,10000,20000 TIMESTAMP
              */
             if (this.myTopic != null) {
-                console.log("JA 1");
+                console_1.default.log("JA 1");
                 //maddr topics
                 this.node.pubsub.subscribe("ORGA_ANNOUNCE");
                 this.node.pubsub.on("ORGA_ANNOUNCE", (msg) => {
                     try {
-                        console.log("Got Announce %s", toString(msg.data));
+                        console_1.default.log("Got Announce %s", toString(msg.data));
                         const splitMessage = toString(msg.data).split(" ", 2);
-                        console.log("split0: %s", splitMessage[0]);
-                        console.log("split1: %s", splitMessage[1]);
-                        console.log("Array split1: %s", JSON.parse(splitMessage[1]));
+                        console_1.default.log("split0: %s", splitMessage[0]);
+                        console_1.default.log("split1: %s", splitMessage[1]);
+                        console_1.default.log("Array split1: %s", JSON.parse(splitMessage[1]));
                         if (splitMessage[0] != root.myAddr && root.lookupService.register(multiaddr(splitMessage[0]), JSON.parse(splitMessage[1]))) { // if see new maddr send my metadata
                             this.announceMyself();
                         }
-                        console.log("lookupService:" + JSON.stringify(root.lookupService.peerRefrences));
+                        console_1.default.log("lookupService:" + JSON.stringify(root.lookupService.peerRefrences));
                     }
                     catch (e) {
-                        console.error(e);
+                        console_1.default.error(e);
                     }
                 });
                 this.node.pubsub.subscribe("ORGA_DISCON");
                 this.node.pubsub.on("ORGA_DISCON", (msg) => {
                     try {
-                        console.log("Got Discon %s", toString(msg.data));
-                        this.lookupService.unregister(multiaddr(toString(msg.data)));
-                        console.log("lookupService:" + JSON.stringify(root.lookupService.peerRefrences));
+                        console_1.default.log("Got Discon %s", toString(msg.data));
+                        this.lookupService.unregister((toString(msg.data)));
+                        console_1.default.log("lookupService:" + JSON.stringify(root.lookupService.peerRefrences));
                     }
                     catch (e) {
-                        console.error(e);
+                        console_1.default.error(e);
                     }
                 });
             }
@@ -199,10 +206,10 @@ class p2pNode {
                             // For each chunk of data
                             for (source_1 = __asyncValues(source); source_1_1 = yield source_1.next(), !source_1_1.done;) {
                                 let chunk = source_1_1.value;
-                                console.log("get message: %s", chunk.toString());
+                                console_1.default.log("get message: %s", chunk.toString());
                                 //"GET " + this.myAddr + " " + commands[0] + " " + commands[1] + " " + ecchoBoxPeerId + " " + responseId
                                 let commands = chunk.toString().split(" ", 6);
-                                console.log("opt: " + commands[2] + "topic: " + commands[3] + "adr: " + commands[1] + "clientId: " + commands[4] + "responseId: " + commands[5]);
+                                console_1.default.log("opt: " + commands[2] + "topic: " + commands[3] + "adr: " + commands[1] + "clientId: " + commands[4] + "responseId: " + commands[5]);
                                 root.get(commands[2] + " " + commands[3]).then(function (value) {
                                     resp(commands[1], value + " " + commands[4], n, commands[5]);
                                 }, function (err) {
@@ -223,7 +230,7 @@ class p2pNode {
             this.node.multiaddrs.forEach(addr => {
                 if (!addr.toString().includes("127.0.0.1"))
                     this.myAddr = `${addr.toString()}/p2p/${this.node.peerId.toB58String()}`;
-                console.log(`${addr.toString()}/p2p/${this.node.peerId.toB58String()}`);
+                console_1.default.log(`${addr.toString()}/p2p/${this.node.peerId.toB58String()}`);
             });
             process.on('SIGTERM', this.stop);
             process.on('SIGINT', this.stop);
@@ -243,8 +250,8 @@ class p2pNode {
                 this.redundantTopics.forEach(element => {
                     topics.push(element.topic);
                 });
-                console.log("topics: " + topics);
-                console.log("topics stringify" + JSON.stringify(topics));
+                console_1.default.log("topics: " + topics);
+                console_1.default.log("topics stringify" + JSON.stringify(topics));
                 this.publish("ORGA_ANNOUNCE", this.myAddr + " " + JSON.stringify(topics));
             }
         });
@@ -254,46 +261,51 @@ class p2pNode {
             yield new Promise(resolve => setTimeout(resolve, 10000)); // wait 10 sec
             try {
                 if (this.redundantCount > 0) {
-                    let staus = this.getStatus().replace('"', '').replace('{', '').replace('}', '');
-                    console.log("redundant before:" + staus);
+                    let staus = this.getStatus().replace(/"/g, '').replace('{', '').replace('}', '');
+                    console_1.default.log("redundant before:" + staus);
                     if (staus.split(",").length > 1) {
-                        let leastRedundant = null;
+                        let leastRedundant = [null, null];
                         staus.split(",").forEach(elment => {
                             let topic = elment.split(":")[0];
-                            let topicAmount = parseInt(elment.split(":")[0]);
-                            if (topic != this.myTopic && this.redundantTopics.some(redundantTop => { redundantTop.topic == topic; })) {
-                                if (leastRedundant == null) {
+                            let topicAmount = parseInt(elment.split(":")[1]);
+                            console_1.default.log("redundant looping:" + topic + " " + topicAmount);
+                            console_1.default.log("redundant topic:" + topic + " mytopic " + this.myTopic + " redundantTopics: " + JSON.stringify(this.redundantTopics));
+                            if (topic != this.myTopic && !this.redundantTopics.some(redundantTop => { return redundantTop.topic == topic; })) {
+                                if (leastRedundant[0] == null) {
+                                    console_1.default.log("redundant saving:" + topic + " " + topicAmount);
                                     leastRedundant[0] = topic;
                                     leastRedundant[1] = topicAmount;
                                 }
                                 if (topicAmount < leastRedundant[1]) {
+                                    console_1.default.log("redundant saving:" + topic + " " + topicAmount);
                                     leastRedundant[0] = topic;
                                     leastRedundant[1] = topicAmount;
                                 }
                             }
                         });
-                        if (redundantTopic != null) {
+                        console_1.default.log("redundant found:" + leastRedundant[0] + " " + leastRedundant[1]);
+                        if (leastRedundant[0] != null) {
                             let newRedundantTopic = new redundantTopic(leastRedundant[0]);
                             newRedundantTopic.clearFile();
                             this.redundantTopics.push(newRedundantTopic);
                             let responseId = Math.floor(new Date().getTime() / 1000).toString();
                             this.listenNewRedundant(this.redundantTopics[this.redundantTopics.length - 1], responseId);
-                            this.dialGet("GET " + this.myAddr + " ALL " + redundantTopic[0] + " 1 " + responseId, redundantTopic[0]);
+                            this.dialGet("GET " + this.myAddr + " ALL " + leastRedundant[0] + " 1 " + responseId, leastRedundant[0]);
                         }
                     }
                 }
             }
             catch (e) {
-                console.error("Error saving redundant: " + e);
+                console_1.default.error("Error saving redundant: " + e);
             }
         });
     }
     response(adr, obj, n, responseId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log("JA 3.5" + adr + " " + obj + "\n node:" + n);
+                console_1.default.log("JA 3.5" + adr + " " + obj + "\n node:" + n);
                 const { stream, protocol } = yield n.dialProtocol(multiaddr(adr), `/response:${responseId}/1.0.0`);
-                console.log("JA 4: %s", obj);
+                console_1.default.log("JA 4: %s", obj);
                 pipe(
                 // Read from stdin (the source)
                 stream_1.Readable.from(obj), (source) => (map(source, (string) => fromString(string))), 
@@ -302,7 +314,7 @@ class p2pNode {
                 stream.sink);
             }
             catch (e) {
-                console.log(e);
+                console_1.default.log(e);
             }
         });
     }
@@ -339,7 +351,7 @@ class p2pNode {
                 if (commands[1] == this.myTopic || this.redundantTopics.some(element => { return element.topic == commands[1]; })) {
                     let data = yield promises.readFile(__dirname + `/sensors/${commands[1]}.csv`); //Does open read and close inffective ?
                     data = data.toString().substring(0, data.toString().length - 2);
-                    console.log("Ohne , Hier: " + data);
+                    console_1.default.log("Ohne , Hier: " + data);
                     if (commands[0] == "ALL") {
                         return `{ "message": "SUCCESS", "data": [${data}], "type": "${commands[1]}", "description": "${commands[0]}" }`;
                     }
@@ -360,15 +372,15 @@ class p2pNode {
                         let upperBoud = parseInt(bound[2]);
                         // Unexpected token ] in JSON at pos 
                         let jsonData = JSON.parse(`{"data": [${data}]}`);
-                        console.log(jsonData.data);
+                        console_1.default.log(jsonData.data);
                         let result = "";
                         jsonData = jsonData.data.forEach((element) => {
                             if (parseInt(element.key) >= lowerBoud && parseInt(element.key) <= upperBoud) {
-                                console.log(element);
+                                console_1.default.log(element);
                                 result += JSON.stringify(element);
                             }
                         });
-                        console.log(result);
+                        console_1.default.log(result);
                         return `{ "message": "SUCCESS", "data": [${result}], "type": "${commands[1]}", "description": "${commands[0]}" }`;
                     }
                     else {
@@ -378,7 +390,7 @@ class p2pNode {
                 else {
                     if (ecchoBoxPeerId != null && listener != null) {
                         let responseId = Math.floor(new Date().getTime() / 1000).toString();
-                        console.log("GET " + this.myAddr + " " + commands[0] + " " + commands[1] + " " + ecchoBoxPeerId + " " + responseId);
+                        console_1.default.log("GET " + this.myAddr + " " + commands[0] + " " + commands[1] + " " + ecchoBoxPeerId + " " + responseId);
                         this.listen(listener, responseId);
                         this.dialGet("GET " + this.myAddr + " " + commands[0] + " " + commands[1] + " " + ecchoBoxPeerId + " " + responseId, commands[1]);
                     }
@@ -386,26 +398,26 @@ class p2pNode {
                 }
             }
             catch (err) {
-                console.log(err);
+                console_1.default.log(err);
                 return `{ "message": "ERROR", "data": [], "type": "N/A" }`;
             }
         });
     }
     subscribe(topic, listener) {
-        console.log('Topic is %s', topic);
+        console_1.default.log('Topic is %s', topic);
         this.node.pubsub.subscribe(topic);
         this.node.pubsub.on(topic, (msg) => {
             var _a;
             //if (this.redundantTopics.some(element => { return element.topic == topic }))
             (_a = this.redundantTopics.find(element => { return element.topic == topic; })) === null || _a === void 0 ? void 0 : _a.writeStream.write(msg + ",\n"); // test if ? works
-            console.log(`Topic: ${topic} \nMessage :${toString(msg.data)}\n\n`);
+            console_1.default.log(`Topic: ${topic} \nMessage :${toString(msg.data)}\n\n`);
             listener.subscribeMessage(topic, toString(msg.data));
         });
-        console.log('I am subscribed to : %s', this.node.pubsub.getTopics());
+        console_1.default.log('I am subscribed to : %s', this.node.pubsub.getTopics());
     }
     unsubscribe(topic) {
         this.node.pubsub.unsubscribe(topic);
-        console.log('I am subscribed to : %s', this.node.pubsub.getTopics());
+        console_1.default.log('I am subscribed to : %s', this.node.pubsub.getTopics());
     }
     addToMyTopic(msg) {
         this.writeStream.write(msg + ",\n");
@@ -413,14 +425,16 @@ class p2pNode {
     }
     publish(topic, msg) {
         this.node.pubsub.publish(topic, fromString(msg)).catch(err => {
-            console.error(err);
+            console_1.default.error(err);
         });
     }
     dialGet(msg, topic) {
         return __awaiter(this, void 0, void 0, function* () {
+            console_1.default.log("Dial Get: " + topic, " " + JSON.stringify(this.lookupService));
             if (this.lookupService.find(topic).length == 0)
                 return false;
             try {
+                console_1.default.log("Dial Get" + msg + " from: " + this.lookupService.find(topic)[0].maddr);
                 const { stream, protocol } = yield this.node.dialProtocol(this.lookupService.find(topic)[0].maddr, `/get/1.0.0`);
                 pipe(
                 // Read from stdin (the source)
@@ -430,16 +444,16 @@ class p2pNode {
                 stream.sink);
             }
             catch (e) {
-                console.error("dialGetError " + e);
-                console.log("Removed refrence to " + this.lookupService.find(topic)[0].maddr + " due to Error");
-                this.lookupService.unregister(this.lookupService.find(topic)[0].maddr); //if error with this peer remove him
-                console.log("lookupService:" + this.lookupService.peerRefrences.toString());
+                console_1.default.error("dialGetError " + e);
+                console_1.default.log("Removed refrence to " + this.lookupService.find(topic)[0].maddr + " due to Error");
+                this.lookupService.unregister(this.lookupService.find(topic)[0].maddr.toString().substring(this.lookupService.find(topic)[0].maddr.toString().lastIndexOf('/') + 1, this.lookupService.find(topic)[0].maddr.toString().length)); //if error with this peer remove him
+                console_1.default.log("lookupService:" + JSON.stringify(this.lookupService.peerRefrences));
                 this.dialGet(msg, topic);
             }
         });
     }
     listen(listener, responseId) {
-        console.log('Listening for response');
+        console_1.default.log('Listening for response');
         this.node.handle(`/response:${responseId}/1.0.0`, ({ connection, stream, protocol }) => __awaiter(this, void 0, void 0, function* () {
             pipe(
             // Read from the stream (the source)
@@ -453,7 +467,7 @@ class p2pNode {
                         // For each chunk of data
                         for (source_2 = __asyncValues(source); source_2_1 = yield source_2.next(), !source_2_1.done;) {
                             let chunk = source_2_1.value;
-                            console.log("%s", chunk.toString());
+                            console_1.default.log("%s", chunk.toString());
                             listener.respond(chunk.toString());
                         }
                     }
@@ -470,7 +484,7 @@ class p2pNode {
         }));
     }
     listenNewRedundant(redundantTop, responseId) {
-        console.log('Listening for response redundant');
+        console_1.default.log('Listening for response redundant');
         this.node.handle(`/response:${responseId}/1.0.0`, ({ connection, stream, protocol }) => __awaiter(this, void 0, void 0, function* () {
             pipe(
             // Read from the stream (the source)
@@ -484,9 +498,13 @@ class p2pNode {
                         // For each chunk of data
                         for (source_3 = __asyncValues(source); source_3_1 = yield source_3.next(), !source_3_1.done;) {
                             let chunk = source_3_1.value;
-                            console.log("This shoud be saved to redundant Topic: %s", chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
-                            // !!----------------------------------------- hier save to disk
-                            redundantTop.writeStream.write(chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
+                            console_1.default.log("This shoud be saved to redundant Topic: %s", chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
+                            let jsonData = JSON.parse(chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
+                            console_1.default.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData));
+                            if (jsonData.message == "SUCCESS") {
+                                console_1.default.log("bin in Success");
+                                redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n");
+                            }
                         }
                     }
                     catch (e_3_1) { e_3 = { error: e_3_1 }; }
