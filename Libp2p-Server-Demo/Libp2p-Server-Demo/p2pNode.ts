@@ -547,7 +547,7 @@ export class p2pNode {
                     }
                     //console.log("All Chunks: %s", allData.substring(0, allData.lastIndexOf(' ')))
                     let jsonData = JSON.parse(allData.substring(0, allData.lastIndexOf(' ')))
-                    console.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData))
+                    //console.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData))                --- wieder an machen
                     if (jsonData.message == "SUCCESS") {
                         console.log("bin in Success")
                         redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n")
