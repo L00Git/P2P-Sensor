@@ -135,7 +135,7 @@
                 if (wsMsg.indexOf("error") > 0) {
                     append("error: " + wsMsg.error)
                 } else {
-                    append("message: " + wsMsg)
+                    //append("message: " + wsMsg)
                 }
             };
         } catch (exception) {

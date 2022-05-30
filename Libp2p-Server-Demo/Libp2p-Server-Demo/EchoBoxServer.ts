@@ -42,6 +42,7 @@ class EccoBoxPeer {
         let found = false
         this.topics.forEach(element => {
             console.log("Comparing: " + topic + " to " + element);
+
             if (element == topic) {
                 found = true
             }
@@ -153,7 +154,7 @@ export class EccoBoxServer implements SubListener {
         let id = str[str.length - 1]
 
         this.getEccoBoxPeerFromId(id).connection.sendUTF(msg.substring(0, msg.lastIndexOf(' ')))
-        console.log("Resond: " + msg.substring(0, msg.lastIndexOf(' ') - 1))
+        console.log("Respond: " + msg.substring(0, msg.lastIndexOf(' ') - 1))
     }
 
 
@@ -183,7 +184,7 @@ export class EccoBoxServer implements SubListener {
         else if (commands[0] === "UNSUB") {
             try {
                 let response = this.getEccoBoxPeerFromId(eccoBoxPeerId).removeTopic(commands[1]);
-                this.p2p.unsubscribe(commands[1]);
+                //this.p2p.unsubscribe(commands[1]);            --- Nur wenn kein anderer Client sub und nicht red Topic
                 return response;
             } catch (e) {
                 return e;

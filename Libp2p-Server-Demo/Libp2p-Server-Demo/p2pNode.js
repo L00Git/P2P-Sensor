@@ -137,7 +137,7 @@ class p2pNode {
             console_1.default.log('libp2p has started');
             this.setTerminalTitle(this.node.peerId.toB58String());
             this.node.on('peer:discovery', (peerData) => {
-                console_1.default.log('Found a peer in the local network', peerData.id.toString(), peerData.multiaddrs);
+                console_1.default.log('Found a peer in the local network', peerData.id.toB58String(), peerData.multiaddrs);
             });
             this.node.connectionManager.on('peer:connect', (connection) => {
                 console_1.default.log('Connected to %s', connection.remotePeer.toB58String()); // Log connected peer
@@ -303,9 +303,9 @@ class p2pNode {
     response(adr, obj, n, responseId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console_1.default.log("JA 3.5" + adr + " " + obj + "\n node:" + n);
+                //console.log("JA 3.5" + adr + " " + obj + "\n node:" + n)                --- wieder an machen
                 const { stream, protocol } = yield n.dialProtocol(multiaddr(adr), `/response:${responseId}/1.0.0`);
-                console_1.default.log("JA 4: %s", obj);
+                // console.log("JA 4: %s", obj)                --- wieder an machen
                 pipe(
                 // Read from stdin (the source)
                 stream_1.Readable.from(obj), (source) => (map(source, (string) => fromString(string))), 
@@ -351,7 +351,7 @@ class p2pNode {
                 if (commands[1] == this.myTopic || this.redundantTopics.some(element => { return element.topic == commands[1]; })) {
                     let data = yield promises.readFile(__dirname + `/sensors/${commands[1]}.csv`); //Does open read and close inffective ?
                     data = data.toString().substring(0, data.toString().length - 2);
-                    console_1.default.log("Ohne , Hier: " + data);
+                    //console.log("Ohne , Hier: " + data)               --- wieder an machen
                     if (commands[0] == "ALL") {
                         return `{ "message": "SUCCESS", "data": [${data}], "type": "${commands[1]}", "description": "${commands[0]}" }`;
                     }
@@ -405,14 +405,15 @@ class p2pNode {
     }
     subscribe(topic, listener) {
         console_1.default.log('Topic is %s', topic);
-        this.node.pubsub.subscribe(topic);
-        this.node.pubsub.on(topic, (msg) => {
-            var _a;
-            //if (this.redundantTopics.some(element => { return element.topic == topic }))
-            (_a = this.redundantTopics.find(element => { return element.topic == topic; })) === null || _a === void 0 ? void 0 : _a.writeStream.write(msg + ",\n"); // test if ? works
-            console_1.default.log(`Topic: ${topic} \nMessage :${toString(msg.data)}\n\n`);
-            listener.subscribeMessage(topic, toString(msg.data));
-        });
+        if (!this.node.pubsub.getTopics().includes(topic)) {
+            this.node.pubsub.subscribe(topic);
+            this.node.pubsub.on(topic, (msg) => {
+                var _a;
+                (_a = this.redundantTopics.find(element => { return element.topic == topic; })) === null || _a === void 0 ? void 0 : _a.writeStream.write(msg + ",\n"); // test if ? works
+                console_1.default.log(`Topic: ${topic} \nMessage :${toString(msg.data)}\n\n`);
+                listener.subscribeMessage(topic, toString(msg.data));
+            });
+        }
         console_1.default.log('I am subscribed to : %s', this.node.pubsub.getTopics());
     }
     unsubscribe(topic) {
@@ -463,12 +464,14 @@ class p2pNode {
                 var source_2, source_2_1;
                 var e_2, _a;
                 return __awaiter(this, void 0, void 0, function* () {
+                    console_1.default.log("start receiving");
+                    let allData = "";
                     try {
                         // For each chunk of data
                         for (source_2 = __asyncValues(source); source_2_1 = yield source_2.next(), !source_2_1.done;) {
                             let chunk = source_2_1.value;
-                            console_1.default.log("%s", chunk.toString());
-                            listener.respond(chunk.toString());
+                            console_1.default.log("One Chunk: %s", chunk.toString());
+                            allData += chunk.toString();
                         }
                     }
                     catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -478,6 +481,8 @@ class p2pNode {
                         }
                         finally { if (e_2) throw e_2.error; }
                     }
+                    console_1.default.log("All Chunks%s", allData);
+                    listener.respond(allData);
                 });
             });
             this.unlisten(`/response:${responseId}/1.0.0`);
@@ -494,17 +499,14 @@ class p2pNode {
                 var source_3, source_3_1;
                 var e_3, _a;
                 return __awaiter(this, void 0, void 0, function* () {
+                    console_1.default.log("start receiving");
+                    let allData = "";
                     try {
                         // For each chunk of data
                         for (source_3 = __asyncValues(source); source_3_1 = yield source_3.next(), !source_3_1.done;) {
                             let chunk = source_3_1.value;
-                            console_1.default.log("This shoud be saved to redundant Topic: %s", chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
-                            let jsonData = JSON.parse(chunk.toString().substring(0, chunk.toString().lastIndexOf(' ')));
-                            console_1.default.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData));
-                            if (jsonData.message == "SUCCESS") {
-                                console_1.default.log("bin in Success");
-                                redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n");
-                            }
+                            console_1.default.log("One Chunk: %s", chunk.toString());
+                            allData += chunk.toString();
                         }
                     }
                     catch (e_3_1) { e_3 = { error: e_3_1 }; }
@@ -513,6 +515,13 @@ class p2pNode {
                             if (source_3_1 && !source_3_1.done && (_a = source_3.return)) yield _a.call(source_3);
                         }
                         finally { if (e_3) throw e_3.error; }
+                    }
+                    console_1.default.log("All Chunks: %s", allData.substring(0, allData.lastIndexOf(' ')));
+                    let jsonData = JSON.parse(allData.substring(0, allData.lastIndexOf(' ')));
+                    console_1.default.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData));
+                    if (jsonData.message == "SUCCESS") {
+                        console_1.default.log("bin in Success");
+                        redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n");
                     }
                 });
             });

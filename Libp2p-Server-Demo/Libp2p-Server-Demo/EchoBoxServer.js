@@ -151,7 +151,7 @@ class EccoBoxServer {
             else if (commands[0] === "UNSUB") {
                 try {
                     let response = this.getEccoBoxPeerFromId(eccoBoxPeerId).removeTopic(commands[1]);
-                    this.p2p.unsubscribe(commands[1]);
+                    //this.p2p.unsubscribe(commands[1]);            --- Nur wenn kein anderer Client sub und nicht red Topic
                     return response;
                 }
                 catch (e) {
