@@ -291,6 +291,7 @@ class p2pNode {
                             let responseId = Math.floor(new Date().getTime() / 1000).toString();
                             this.listenNewRedundant(this.redundantTopics[this.redundantTopics.length - 1], responseId);
                             this.dialGet("GET " + this.myAddr + " ALL " + leastRedundant[0] + " 1 " + responseId, leastRedundant[0]);
+                            this.announceMyself();
                         }
                     }
                 }
@@ -470,7 +471,7 @@ class p2pNode {
                         // For each chunk of data
                         for (source_2 = __asyncValues(source); source_2_1 = yield source_2.next(), !source_2_1.done;) {
                             let chunk = source_2_1.value;
-                            console_1.default.log("One Chunk: %s", chunk.toString());
+                            //console.log("One Chunk: %s", chunk.toString())                 --- wieder an machen
                             allData += chunk.toString();
                         }
                     }
@@ -481,7 +482,7 @@ class p2pNode {
                         }
                         finally { if (e_2) throw e_2.error; }
                     }
-                    console_1.default.log("All Chunks%s", allData);
+                    //console.log("All Chunks%s", allData)                --- wieder an machen
                     listener.respond(allData);
                 });
             });
@@ -505,7 +506,7 @@ class p2pNode {
                         // For each chunk of data
                         for (source_3 = __asyncValues(source); source_3_1 = yield source_3.next(), !source_3_1.done;) {
                             let chunk = source_3_1.value;
-                            console_1.default.log("One Chunk: %s", chunk.toString());
+                            //console.log("One Chunk: %s", chunk.toString())                --- wieder an machen
                             allData += chunk.toString();
                         }
                     }
@@ -516,12 +517,13 @@ class p2pNode {
                         }
                         finally { if (e_3) throw e_3.error; }
                     }
-                    console_1.default.log("All Chunks: %s", allData.substring(0, allData.lastIndexOf(' ')));
+                    //console.log("All Chunks: %s", allData.substring(0, allData.lastIndexOf(' ')))
                     let jsonData = JSON.parse(allData.substring(0, allData.lastIndexOf(' ')));
-                    console_1.default.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData));
+                    //console.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData))                --- wieder an machen
                     if (jsonData.message == "SUCCESS") {
                         console_1.default.log("bin in Success");
-                        redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n");
+                        let stringified = JSON.stringify(jsonData.data);
+                        redundantTop.writeStream.write(stringified.replace('[', '').slice(0, stringified.lastIndexOf(']')) + ",\n");
                     }
                 });
             });

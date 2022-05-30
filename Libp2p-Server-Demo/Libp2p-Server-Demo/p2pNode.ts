@@ -307,6 +307,7 @@ export class p2pNode {
                         let responseId = Math.floor(new Date().getTime() / 1000).toString()
                         this.listenNewRedundant(this.redundantTopics[this.redundantTopics.length-1], responseId)
                         this.dialGet("GET " + this.myAddr + " ALL " + leastRedundant[0] + " 1 " + responseId, leastRedundant[0])
+                        this.announceMyself()
                     }
                 }
             }
@@ -550,7 +551,8 @@ export class p2pNode {
                     //console.log("bin in Success" + jsonData + " " + JSON.stringify(jsonData))                --- wieder an machen
                     if (jsonData.message == "SUCCESS") {
                         console.log("bin in Success")
-                        redundantTop.writeStream.write(JSON.stringify(jsonData.data) + ",\n")
+                        let stringified = JSON.stringify(jsonData.data)
+                        redundantTop.writeStream.write(stringified.replace('[', '').slice(0, stringified.lastIndexOf(']')) + ",\n")
                     }
                 }
             )

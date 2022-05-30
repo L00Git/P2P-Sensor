@@ -122,7 +122,7 @@ class EccoBoxServer {
         let str = msg.split(' ');
         let id = str[str.length - 1];
         this.getEccoBoxPeerFromId(id).connection.sendUTF(msg.substring(0, msg.lastIndexOf(' ')));
-        console.log("Resond: " + msg.substring(0, msg.lastIndexOf(' ') - 1));
+        console.log("Respond: " + msg.substring(0, msg.lastIndexOf(' ') - 1));
     }
     //missing get and pub functionality
     evalQuery(query, eccoBoxPeerId) {

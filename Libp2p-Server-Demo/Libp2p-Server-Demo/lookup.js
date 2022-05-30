@@ -22,7 +22,7 @@ class lookupService {
         if (this.peerRefrences.some(element => { return element.maddr.equals(maddr); })) //if see new maddr return true => send all my metadata
             register = false;
         if (!this.peerRefrences.some(element => { return element.maddr.equals(maddr) && element.topics.length == topics.length && element.topics.every((value, index) => value == topics[index]); })) {
-            this.unregister(maddr.toString().substring(maddr.toString().lastIndexOf('/'), maddr.toString().length));
+            this.unregister(maddr.toString().substring(maddr.toString().lastIndexOf('/') + 1, maddr.toString().length));
             this.peerRefrences.push(newPeerRefrence);
         }
         return register;
