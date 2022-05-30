@@ -552,7 +552,7 @@ export class p2pNode {
                     if (jsonData.message == "SUCCESS") {
                         console.log("bin in Success")
                         let stringified = JSON.stringify(jsonData.data)
-                        redundantTop.writeStream.write(stringified.replace('[', '').slice(0, stringified.lastIndexOf(']')) + ",\n")
+                        redundantTop.writeStream.write(stringified.replace('[', '').substring(0, stringified.lastIndexOf(']') - 1) + ",\n")
                     }
                 }
             )
